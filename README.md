@@ -1,6 +1,6 @@
 # xtar
 
-A TypeScript CLI tool for reliable folder archiving with timestamp preservation on Linux and macOS.
+A TypeScript CLI tool for reliable folder archiving and cleaning with timestamp preservation on Linux and macOS.
 
 ## Features
 
