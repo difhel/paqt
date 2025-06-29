@@ -1,0 +1,244 @@
+# xtar
+
+A vibe-coded TypeScript command-line tool for reliable folder archiving with timestamp preservation. Supports three operations: scanning folders to generate metadata, compressing folders with maximum compression, and decompressing archives while restoring original timestamps.
+
+## Features
+
+- **Reliable archiving**: Uses tar and xz with maximum compression settings
+- **Timestamp preservation**: Restores both creation time and modification time on supported platforms
+- **Cross-platform**: Works on Linux and macOS with Node.js ≥14 or Bun
+- **Skip symlinks**: Automatically skips symlinks and `.l*nk` files for safety
+- **Include hidden files**: Processes all files including hidden files (`.*)
+- **Append-only scanning**: Option to add new files without updating existing timestamps
+- **Automatic tool detection**: Falls back to `gtar` if standard `tar` doesn't support `-I` flag
+
+## Prerequisites
+
+The tool requires the following system utilities:
+
+- `tar` (with `-I` flag support) or `gtar` (GNU tar)
+- `xz` compression utility
+
+### Installation on macOS
+
+```bash
+# Install GNU tar and xz via Homebrew
+brew install gnu-tar xz
+
+# Or install xz-utils
+brew install xz
+```
+
+### Installation on Linux
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install tar xz-utils
+
+# CentOS/RHEL
+sudo yum install tar xz
+
+# Arch Linux
+sudo pacman -S tar xz
+```
+
+## Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Or run directly with tsx for development
+npm run dev -- --help
+```
+
+## Usage
+
+### Command Overview
+
+```bash
+xtar <command> [options]
+
+Commands:
+  scan <folder>            Scan folder and create/update metadata.csv
+  compress <folder>        Compress folder into tar.xz archive
+  decompress <archive>     Decompress archive and restore timestamps
+  help [command]           Display help for command
+
+Options:
+  -V, --version           Display version number
+  -h, --help              Display help for command
+```
+
+### 1. Scan Command
+
+Recursively scans a folder and generates a `metadata.csv` file containing file paths and modification timestamps.
+
+```bash
+# Basic scan - overwrites existing metadata.csv
+xtar scan /path/to/folder
+
+# Append-only scan - preserves existing entries, adds new files
+xtar scan /path/to/folder --append-only
+```
+
+**Output Format** (`metadata.csv`):
+```csv
+path,modifiedTime
+file1.txt,2024-01-15T10:30:45.123Z
+subfolder/file2.js,2024-01-14T15:20:30.456Z
+.hidden-file,2024-01-13T08:45:15.789Z
+```
+
+### 2. Compress Command
+
+Compresses a folder into a highly compressed `.tar.xz` archive. Automatically scans the folder if `metadata.csv` doesn't exist.
+
+```bash
+# Compress with default name (folder-name.tar.xz)
+xtar compress /path/to/folder
+
+# Compress with custom output path
+xtar compress /path/to/folder --output /custom/path/archive.tar.xz
+xtar compress /path/to/folder -o archive.tar.xz
+```
+
+**Compression Settings:**
+- Uses `xz -9e` (extreme compression)
+- LZMA2 dictionary size: 1.5GB
+- Multi-threaded compression (`-T0`)
+- Typically achieves 20-40% better compression than standard settings
+
+### 3. Decompress Command
+
+Extracts a `.tar.xz` archive and restores original file timestamps from the included `metadata.csv`.
+
+```bash
+# Decompress with default folder name (removes .tar.xz extension)
+xtar decompress archive.tar.xz
+
+# Decompress to custom folder
+xtar decompress archive.tar.xz --output /custom/path
+xtar decompress archive.tar.xz -o restored-folder
+```
+
+**Timestamp Restoration:**
+- On macOS: Sets both birth time and modification time
+- On Linux: Sets modification time (birth time not supported)
+- Fails gracefully if timestamps cannot be set
+
+## Examples
+
+### Complete Workflow
+
+```bash
+# 1. Create a test folder with some files
+mkdir test-folder
+echo "Hello World" > test-folder/file1.txt
+echo "Hidden content" > test-folder/.hidden
+mkdir test-folder/subfolder
+echo "Nested file" > test-folder/subfolder/nested.txt
+
+# 2. Scan the folder
+xtar scan test-folder
+# Creates test-folder/metadata.csv
+
+# 3. Compress the folder
+xtar compress test-folder
+# Creates test-folder.tar.xz
+
+# 4. Remove original folder
+rm -rf test-folder
+
+# 5. Decompress and restore
+xtar decompress test-folder.tar.xz
+# Restores test-folder/ with original timestamps
+```
+
+### Incremental Backups
+
+```bash
+# Initial scan
+xtar scan my-project
+
+# ... time passes, files are modified ...
+
+# Add new files without updating existing timestamps
+xtar scan my-project --append-only
+
+# Compress with all metadata
+xtar compress my-project -o my-project-backup.tar.xz
+```
+
+## Error Handling
+
+The tool provides clear error messages and exits with appropriate codes:
+
+- **Exit code 0**: Success
+- **Exit code 1**: Error (missing tools, invalid paths, compression failures, etc.)
+
+Common error scenarios:
+
+```bash
+# Missing required tools
+Error: xz command not found. Please install xz-utils or equivalent.
+Error: Neither tar nor gtar support the -I flag. Please install GNU tar.
+
+# Invalid paths
+Error: /nonexistent/path does not exist
+Error: /path/to/file is not a directory
+
+# Missing metadata
+Error: metadata.csv not found in extracted archive
+```
+
+## Platform Notes
+
+### macOS
+- If built-in `tar` doesn't support `-I` flag, automatically switches to `gtar`
+- Requires GNU tar for `-I` flag support: `brew install gnu-tar`
+- Birth time restoration supported via `touch -t`
+
+### Linux
+- Most distributions include compatible `tar` by default
+- Birth time restoration not supported (filesystem limitation)
+- Modification time restoration works normally
+
+### Node.js vs Bun
+- Fully compatible with Node.js ≥14
+- Tested with Bun runtime
+- Uses standard Node.js APIs (`fs.promises`, `child_process`)
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Development mode (runs TypeScript directly)
+npm run dev -- scan test-folder
+
+# Build for production
+npm run build
+
+# Run built version
+npm start -- --help
+```
+
+## Architecture
+
+The tool is structured into focused modules:
+
+- `cli.ts` - Command-line interface and argument parsing
+- `scanner.ts` - Folder scanning and metadata CSV generation
+- `archiver.ts` - Compression operations
+- `restorer.ts` - Decompression and timestamp restoration
+- `utils.ts` - Utility functions and tool detection
+- `types.ts` - TypeScript type definitions
+
+## License
+
+MIT License 
