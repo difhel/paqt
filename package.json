@@ -1,6 +1,6 @@
 {
   "name": "paqt",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A TypeScript CLI tool for reliable folder archiving with timestamp preservation",
   "main": "dist/cli.js",
   "bin": {
@@ -19,7 +19,14 @@
     "start": "node --stack-size=10000 dist/cli.js",
     "test": "echo \"No tests specified\" && exit 0"
   },
-  "keywords": ["cli", "archive", "zpaq", "compression", "backup", "timestamp"],
+  "keywords": [
+    "cli",
+    "archive",
+    "zpaq",
+    "compression",
+    "backup",
+    "timestamp"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
@@ -35,4 +42,4 @@
   "engines": {
     "node": ">=14.0.0"
   }
-} 
+}
