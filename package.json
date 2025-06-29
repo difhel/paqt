@@ -1,14 +1,14 @@
 {
-  "name": "xtar",
+  "name": "paqt",
   "version": "1.0.0",
   "description": "A TypeScript CLI tool for reliable folder archiving with timestamp preservation",
   "main": "dist/cli.js",
   "bin": {
-    "xtar": "./dist/cli.js"
+    "paqt": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
-    "build-cli": "bun build src/cli.ts --compile --outfile xtar",
+    "build-executable": "bun build src/cli.ts --compile --outfile paqt",
     "dev": "tsx src/cli.ts",
     "alias": "npm run build && npm run start",
     "start": "node --stack-size=10000 dist/cli.js",

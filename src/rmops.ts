@@ -3,59 +3,59 @@ import { resolve, join } from 'path';
 import { homedir } from 'os';
 
 /**
- * Get the path to the .xtar_info file
+ * Get the path to the .paqt_info file
  */
 function getInfoFilePath(): string {
-  return resolve(homedir(), '.xtar_info');
+  return resolve(homedir(), '.paqt_info');
 }
 
 /**
- * Read the base directory from .xtar_info file
+ * Read the base directory from .paqt_info file
  * Returns the path or null if there's an error (errors are logged to console)
  */
 function readBaseDirectory(): string | null {
   const infoFile = getInfoFilePath();
   
   if (!existsSync(infoFile)) {
-    console.error('❌ No base directory found. Run "xtar info <folder>" first to set the working directory.');
+    console.error('❌ No base directory found. Run "paqt info <folder>" first to set the working directory.');
     return null;
   }
   
   try {
     const basePath = readFileSync(infoFile, 'utf-8').trim();
     if (!basePath) {
-      console.error('❌ .xtar_info file is empty. Run "xtar info <folder>" to set the working directory.');
+      console.error('❌ .paqt_info file is empty. Run "paqt info <folder>" to set the working directory.');
       return null;
     }
     
     if (!existsSync(basePath)) {
-      console.error(`❌ Base directory no longer exists: ${basePath}. Run "xtar info <folder>" to update.`);
+      console.error(`❌ Base directory no longer exists: ${basePath}. Run "paqt info <folder>" to update.`);
       return null;
     }
     
     return basePath;
   } catch (error) {
-    console.error(`❌ Could not read base directory from .xtar_info: ${error}`);
+    console.error(`❌ Could not read base directory from .paqt_info: ${error}`);
     return null;
   }
 }
 
 /**
- * Reset command - delete the .xtar_info file
+ * Reset command - delete the .paqt_info file
  */
 export async function resetBaseDirectory(): Promise<void> {
   const infoFile = getInfoFilePath();
   
   if (!existsSync(infoFile)) {
-    console.error('❌ .xtar_info file does not exist. Nothing to reset.');
+    console.error('❌ .paqt_info file does not exist. Nothing to reset.');
     return;
   }
   
   try {
     unlinkSync(infoFile);
-    console.log('✅ Base directory reset - .xtar_info file deleted');
+    console.log('✅ Base directory reset - .paqt_info file deleted');
   } catch (error) {
-    console.error(`❌ Failed to delete .xtar_info file: ${error}`);
+    console.error(`❌ Failed to delete .paqt_info file: ${error}`);
   }
 }
 
@@ -64,7 +64,7 @@ export async function resetBaseDirectory(): Promise<void> {
  */
 export async function removeRelative(paths: string[]): Promise<void> {
   if (paths.length === 0) {
-    console.error('❌ No paths specified. Usage: xtar rm <file1> <file2> <dir1> ...');
+    console.error('❌ No paths specified. Usage: paqt rm <file1> <file2> <dir1> ...');
     return;
   }
   
@@ -168,10 +168,10 @@ export async function resolveFolderPath(providedPath?: string): Promise<string |
     
     return fullPath;
   } else {
-    // Use stored path from .xtar_info
+          // Use stored path from .paqt_info
     const storedPath = readBaseDirectory();
     if (!storedPath) {
-      console.error('💡 Hint: Manually pass the folder path or use "xtar info /path/to/folder" first.');
+              console.error('💡 Hint: Manually pass the folder path or use "paqt info /path/to/folder" first.');
       return null;
     }
     return storedPath;

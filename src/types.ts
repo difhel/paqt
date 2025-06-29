@@ -1,5 +1,5 @@
 /**
- * Type definitions for xtar CLI tool
+ * Type definitions for paqt CLI tool
  */
 
 /** Metadata entry for a file */

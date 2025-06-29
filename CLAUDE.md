@@ -1,4 +1,4 @@
-Write a TypeScript command-line program called `xtar` that supports three subcommands—`scan`, `compress` and `decompress`—to reliably snapshot, archive, and restore a folder on Linux and macOS (both Node.js and Bun). The tool must meet the following
+Write a TypeScript command-line program called `paqt` that supports three subcommands—`scan`, `compress` and `decompress`—to reliably snapshot, archive, and restore a folder on Linux and macOS (both Node.js and Bun). The tool must meet the following
 
 ## Requirements
 * Detect at startup that `zpaq` is installed.
@@ -60,7 +60,7 @@ The tool has been extended beyond the original specification to include:
 
 * **Smart Cleaning**: `clean` command to remove temporary files and build artifacts to reduce the size of data to compress
 * **Directory Analysis**: `info` command for comprehensive directory statistics  
-* **Path Memorization**: Commands can use stored paths from previous operations. The path of the base directory is saved into `~/.xtar_info`
+* **Path Memorization**: Commands can use stored paths from previous operations. The path of the base directory is saved into `~/.paqt_info`
 * **Targeted Removal**: `rm` command for removing specific files relative to a base directory
 * **Enhanced Diagnostics**: Detailed analysis of problematic directory structures
 

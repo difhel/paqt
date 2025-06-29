@@ -206,7 +206,7 @@ export async function getDirectoryInfo(dirPath: string): Promise<void> {
   
   // Save the directory path for use with rm command
   try {
-    const infoFile = resolve(homedir(), '.xtar_info');
+    const infoFile = resolve(homedir(), '.paqt_info');
     writeFileSync(infoFile, fullPath, 'utf-8');
     console.log(`💾 Directory path saved for future commands: ${fullPath}`);
   } catch (error) {

@@ -12,7 +12,7 @@ import { ScanOptions, CompressOptions, DecompressOptions, CleanOptions } from '.
 
 // Package info (in a real project, this would come from package.json)
 const packageInfo = {
-  name: 'xtar',
+  name: 'paqt',
   version: '1.0.0',
   description: 'A TypeScript CLI tool for reliable folder archiving with timestamp preservation'
 };
@@ -88,7 +88,7 @@ async function main(): Promise<void> {
           if (storedPath) {
             options.output = storedPath;
           } else {
-            console.error('❌ No stored path available. Use "xtar info <folder>" first or provide a path with -o <path>');
+            console.error('❌ No stored path available. Use "paqt info <folder>" first or provide a path with -o <path>');
             process.exit(1);
           }
         }

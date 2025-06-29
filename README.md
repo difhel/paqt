@@ -1,4 +1,4 @@
-# xtar
+# paqt
 
 A TypeScript CLI tool for reliable folder archiving and cleaning with timestamp preservation on Linux and macOS.
 
@@ -51,13 +51,13 @@ If zpaq is not available in your package manager, download from: https://mattmah
 ## Installation
 
 ```bash
-npm install -g xtar
+npm install -g paqt
 ```
 
 ## Usage
 
 ```bash
-xtar <command> [options]
+paqt <command> [options]
 ```
 
 ### Commands:
@@ -82,15 +82,15 @@ Recursively scans a folder and creates/updates `metadata.csv` with file paths an
 **Examples:**
 ```bash
 # Scan with explicit path
-xtar scan /path/to/folder
+paqt scan /path/to/folder
 
 # Append-only mode (don't update existing file timestamps)
-xtar scan /path/to/folder --append-only
+paqt scan /path/to/folder --append-only
 
 # Using stored path (after running info command)
-xtar info /path/to/folder    # Sets working directory
-xtar scan                    # Scans stored path
-xtar scan --append-only      # Append-only scan of stored path
+paqt info /path/to/folder    # Sets working directory
+paqt scan                    # Scans stored path
+paqt scan --append-only      # Append-only scan of stored path
 ```
 
 **Options:**
@@ -108,15 +108,15 @@ Compresses a folder into a highly compressed `.zpaq` archive using method 5 comp
 **Examples:**
 ```bash
 # Compress with explicit path and default name (folder-name.zpaq)
-xtar compress /path/to/folder
+paqt compress /path/to/folder
 
 # Compress with custom output path
-xtar compress /path/to/folder --output /custom/path/archive.zpaq
-xtar compress /path/to/folder -o archive.zpaq
+paqt compress /path/to/folder --output /custom/path/archive.zpaq
+paqt compress /path/to/folder -o archive.zpaq
 
 # Using stored path (after running info command)
-xtar info /path/to/folder    # Sets working directory
-xtar compress                # Uses stored path
+paqt info /path/to/folder    # Sets working directory
+paqt compress                # Uses stored path
 ```
 
 **Compression Details:**
@@ -133,15 +133,15 @@ Extracts a `.zpaq` archive and restores original file timestamps from the includ
 **Examples:**
 ```bash
 # Decompress with default folder name (removes .zpaq extension)
-xtar decompress archive.zpaq
+paqt decompress archive.zpaq
 
 # Decompress to custom path
-xtar decompress archive.zpaq --output /custom/path
-xtar decompress archive.zpaq -o restored-folder
+paqt decompress archive.zpaq --output /custom/path
+paqt decompress archive.zpaq -o restored-folder
 
 # Using stored path as output location
-xtar info /restore/here        # Sets working directory
-xtar decompress archive.zpaq -o  # Uses stored path as output location
+paqt info /restore/here        # Sets working directory
+paqt decompress archive.zpaq -o  # Uses stored path as output location
 ```
 
 **Features:**
@@ -157,24 +157,24 @@ Removes temporary files, build artifacts, and other unnecessary data from direct
 **Examples:**
 ```bash
 # Preview what would be deleted (dry run)
-xtar clean /path/to/folder --dry-run
+paqt clean /path/to/folder --dry-run
 
 # Clean safe patterns (node_modules, cache, build, etc.)
-xtar clean /path/to/folder
+paqt clean /path/to/folder
 
 # Include careful patterns (.vscode, target, tmp, .cache) - requires confirmation
-xtar clean /path/to/folder --include-careful
+paqt clean /path/to/folder --include-careful
 
 # Include dangerous patterns (.git, .env, config) - requires explicit confirmation
-xtar clean /path/to/folder --include-dangerous
+paqt clean /path/to/folder --include-dangerous
 
 # Clean specific patterns only
-xtar clean /path/to/folder --patterns node_modules,cache,build
+paqt clean /path/to/folder --patterns node_modules,cache,build
 
 # Using stored path (after running info command)
-xtar info /path/to/folder    # Sets working directory
-xtar clean --dry-run         # Clean stored path (dry run)
-xtar clean --patterns cache  # Clean specific patterns from stored path
+paqt info /path/to/folder    # Sets working directory
+paqt clean --dry-run         # Clean stored path (dry run)
+paqt clean --patterns cache  # Clean specific patterns from stored path
 ```
 
 **Safety Categories:**
@@ -195,10 +195,10 @@ Analyzes directory structure and shows statistics. **Also saves the directory pa
 **Examples:**
 ```bash
 # Analyze directory and save path for other commands
-xtar info /path/to/folder
+paqt info /path/to/folder
 
 # Re-analyze stored directory
-xtar info
+paqt info
 ```
 
 **Displays:**
@@ -209,7 +209,7 @@ xtar info
 - All sizes in human-readable format
 
 **Path Storage:**
-The info command saves the analyzed directory path to `~/.xtar_info`. Other commands can then use this stored path when you omit the folder parameter.
+The info command saves the analyzed directory path to `~/.paqt_info`. Other commands can then use this stored path when you omit the folder parameter.
 
 ### 6. Remove Command (rm)
 
@@ -218,10 +218,10 @@ Removes files and directories using paths relative to the base directory set by 
 **Examples:**
 ```bash
 # Remove specific files (paths relative to base directory)
-xtar rm file1.txt subdirectory/largefile.dat folder1
+paqt rm file1.txt subdirectory/largefile.dat folder1
 
 # Remove with wildcards (handled by shell)
-xtar rm *.log build cache node_modules
+paqt rm *.log build cache node_modules
 
 **Security:**
 - Only works with paths under the base directory (no path traversal)
@@ -235,44 +235,44 @@ Removes the stored base directory path.
 **Examples:**
 ```bash
 # Example workflow
-xtar info ~/projects/my-app
+paqt info ~/projects/my-app
 
 # ... use other commands ...
 
 # Remove stored path when done
-xtar rm node_modules/package.zip build/bundle.js logs/debug.log
+paqt rm node_modules/package.zip build/bundle.js logs/debug.log
 
 # Clean up stored path
-xtar reset
+paqt reset
 ```
 
 **Behavior:**
-- Deletes `~/.xtar_info` file
-- Shows error if `.xtar_info` file doesn't exist
+- Deletes `~/.paqt_info` file
+- Shows error if `.paqt_info` file doesn't exist
 - Required before switching to a different project directory
 
 ## Path Memorization System
 
-xtar uses a simple but powerful path memorization system:
+paqt uses a simple but powerful path memorization system:
 
 1. **When you provide a path**: The command executes with that specific path
-2. **When you omit the path**: The tool uses the previously stored path from `~/.xtar_info`
+2. **When you omit the path**: The tool uses the previously stored path from `~/.paqt_info`
 
 This allows for efficient workflows:
 
 ```bash
 # Set working directory once
-xtar info ~/large-project
+paqt info ~/large-project
 
 # Use all commands without repeating the path
-xtar scan                        # Scan ~/large-project
-xtar clean --dry-run             # Clean ~/large-project (dry run)
-xtar rm build logs cache         # Remove files from ~/large-project
-xtar compress                    # Compress ~/large-project
-xtar info                        # Re-analyze ~/large-project
+paqt scan                        # Scan ~/large-project
+paqt clean --dry-run             # Clean ~/large-project (dry run)
+paqt rm build logs cache         # Remove files from ~/large-project
+paqt compress                    # Compress ~/large-project
+paqt info                        # Re-analyze ~/large-project
 
 # Clean up when done
-xtar reset
+paqt reset
 ```
 
 ## Examples
@@ -281,41 +281,41 @@ xtar reset
 
 ```bash
 # Set working directory and analyze
-xtar info /path/to/analyze
+paqt info /path/to/analyze
 
 # Remove unwanted files
-xtar rm file1.txt subdirectory/largefile.dat folder1
+paqt rm file1.txt subdirectory/largefile.dat folder1
 
 # Using shell wildcards (remove all .log files and build-related directories)
-xtar rm *.log build cache node_modules
+paqt rm *.log build cache node_modules
 
 ### Project Analysis and Cleanup
 
 ```bash
 # Example: Clean up a development project
-xtar info ~/projects/my-app
+paqt info ~/projects/my-app
 
 # See what temporary files exist
-xtar clean --dry-run
+paqt clean --dry-run
 
 # Remove safe temporary files
-xtar clean
+paqt clean
 
 # Remove specific files using relative paths
-xtar rm node_modules/package.zip build/bundle.js logs/debug.log
+paqt rm node_modules/package.zip build/bundle.js logs/debug.log
 
 # Clear stored path
-xtar reset
+paqt reset
 ```
 
 ### Complete Workflow
 
 ```bash
 # Clear any existing stored path
-xtar reset
+paqt reset
 
 # Analyze and set working directory
-xtar info ~/projects/my-app
+paqt info ~/projects/my-app
 
 ```
 
@@ -323,28 +323,28 @@ xtar info ~/projects/my-app
 
 ```bash
 # Step 1: Analyze directory structure and set working path
-xtar info ~/projects/my-app
+paqt info ~/projects/my-app
 
 # Step 2: Scan for problematic patterns and create metadata
-xtar scan                               # Scan ~/projects/my-app
+paqt scan                               # Scan ~/projects/my-app
 
 # Step 3: Preview cleanup of temporary files
-xtar clean --dry-run                    # Preview cleanup of ~/projects/my-app
+paqt clean --dry-run                    # Preview cleanup of ~/projects/my-app
 
 # Step 4: Clean specific patterns only
-xtar clean --patterns cache            # Actually clean cache from ~/projects/my-app
+paqt clean --patterns cache            # Actually clean cache from ~/projects/my-app
 
 # Step 5: Remove specific files manually
-xtar rm build logs                     # Remove specific files from ~/projects/my-app
+paqt rm build logs                     # Remove specific files from ~/projects/my-app
 
 # Step 6: Re-analyze after cleanup
-xtar info                              # Shows new statistics
+paqt info                              # Shows new statistics
 
 # Step 7: Create final archive
-xtar compress -o ~/backups/my-app-clean.zpaq
+paqt compress -o ~/backups/my-app-clean.zpaq
 
 # Step 8: Clean up
-xtar reset
+paqt reset
 ```
 
 This workflow demonstrates the power of path memorization - set the working directory once with `info`, then use all other commands without repeating paths.
