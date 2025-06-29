@@ -5,6 +5,7 @@ import { scanFolder } from './scanner.js';
 import { compressFolder } from './archiver.js';
 import { decompressArchive } from './restorer.js';
 import { cleanDirectories } from './cleaner.js';
+import { getDirectoryInfo } from './info.js';
 import { detectTools } from './utils.js';
 import { ScanOptions, CompressOptions, DecompressOptions, CleanOptions } from './types.js';
 
@@ -107,6 +108,20 @@ async function main(): Promise<void> {
         await cleanDirectories(folder, cleanOptions);
       } catch (error) {
         console.error('Cleaning failed:', error);
+        process.exit(1);
+      }
+    });
+  
+  // Info subcommand
+  program
+    .command('info')
+    .description('Show directory statistics (size, file/folder counts, largest items)')
+    .argument('<folder>', 'folder to analyze')
+    .action(async (folder: string) => {
+      try {
+        await getDirectoryInfo(folder);
+      } catch (error) {
+        console.error('Info failed:', error);
         process.exit(1);
       }
     });

@@ -67,6 +67,7 @@ Commands:
   compress <folder>        Compress folder into tar.xz archive
   decompress <archive>     Decompress archive and restore timestamps
   clean <folder>           Clean useless directories (node_modules, cache, etc.)
+  info <folder>            Show directory statistics (size, file/folder counts, largest items)
   help [command]           Display help for command
 
 Options:
@@ -174,6 +175,50 @@ xtar clean /path/to/folder --patterns node_modules,cache,build
 💾 Total space to free: 487.3 MB
 📄 Total files to delete: 43,881
 ```
+
+### 5. Info Command
+
+Provides comprehensive statistics about a directory, including size analysis and identification of the largest files and directories.
+
+```bash
+# Get directory statistics
+xtar info /path/to/folder
+```
+
+**Shows:**
+- 💾 Total directory size
+- 📄 Total file count  
+- 📁 Total directory count
+- 📁 Top 10 largest directories
+- 📄 Top 10 largest files
+
+**Example Output:**
+```bash
+📊 Directory Information: /home/user/projects
+════════════════════════════════════════════════════════════════════════════════
+🔍 Analyzing directory...
+
+📈 Summary Statistics:
+   💾 Total size: 2.5 GB
+   📄 Files: 15,432
+   📁 Directories: 3,247
+
+📁 Top 10 Largest Directories:
+    1. node_modules (1.2 GB)
+    2. .git (450 MB)  
+    3. build (180 MB)
+    4. dist (95 MB)
+    5. cache (67 MB)
+
+📄 Top 10 Largest Files:
+    1. package-lock.json (2.1 MB)
+    2. bundle.js (850 KB)
+    3. database.sqlite (500 KB)
+    4. video.mp4 (350 KB)
+    5. image.png (200 KB)
+```
+
+The `info` command is perfect for understanding directory composition before cleaning or archiving operations.
 
 ## Examples
 
