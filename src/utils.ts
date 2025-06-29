@@ -14,61 +14,24 @@ function commandExists(command: string): boolean {
 }
 
 /**
- * Test if tar command supports -I flag
- */
-function testTarIFlag(tarCommand: string): boolean {
-  try {
-    // Test with a simple command that shouldn't fail if -I is supported
-    execSync(`${tarCommand} --help | grep -q -- "-I"`, { stdio: 'ignore' });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Detect and validate required tools (tar and xz)
+ * Detect and validate required tools (zpaq)
  */
 export function detectTools(): ToolConfig {
   console.log('Checking for required tools...');
   
-  // Check for xz
-  if (!commandExists('xz')) {
-    console.error('Error: xz command not found. Please install xz-utils or equivalent.');
+  // Check for zpaq
+  if (!commandExists('zpaq')) {
+    console.error('Error: zpaq command not found. Please install zpaq.');
+    console.error('  On macOS: brew install zpaq');
+    console.error('  On Ubuntu/Debian: sudo apt install zpaq');
+    console.error('  Or download from: https://mattmahoney.net/dc/zpaq.html');
     process.exit(1);
   }
   
-  // Check for tar with -I support
-  let tarCommand = 'tar';
-  
-  if (!commandExists('tar')) {
-    console.error('Error: tar command not found.');
-    process.exit(1);
-  }
-  
-  // Test if built-in tar supports -I
-  if (!testTarIFlag('tar')) {
-    console.log('Built-in tar does not support -I flag, checking for gtar...');
-    
-    if (!commandExists('gtar')) {
-      console.error('Error: Neither tar nor gtar support the -I flag. Please install GNU tar.');
-      process.exit(1);
-    }
-    
-    if (!testTarIFlag('gtar')) {
-      console.error('Error: gtar does not support -I flag. Please install a compatible version of GNU tar.');
-      process.exit(1);
-    }
-    
-    tarCommand = 'gtar';
-    console.log('Using gtar for archive operations.');
-  }
-  
-  console.log(`✓ Using ${tarCommand} and xz`);
+  console.log('✓ Using zpaq with method 5 compression');
   
   return {
-    tarCommand,
-    xzCommand: 'xz'
+    zpaqCommand: 'zpaq'
   };
 }
 

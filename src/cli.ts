@@ -54,19 +54,19 @@ async function main(): Promise<void> {
   // Compress subcommand
   program
     .command('compress')
-    .description('Compress a folder into a tar.xz archive')
-    .argument('[folder]', 'folder to compress (optional - uses stored path from previous info command)')
-    .option('-o, --output <archive>', 'output archive path (default: <folder-name>.tar.xz)')
-    .action(async (folder: string | undefined, options: CompressOptions) => {
-      const resolvedPath = await resolveFolderPath(folder);
-      if (!resolvedPath) {
-        process.exit(1);
-      }
+    .argument('[folder]', 'folder to compress (uses stored path if omitted)')
+    .description('Compress a folder into a zpaq archive')
+    .option('-o, --output <archive>', 'output archive path (default: <folder-name>.zpaq)')
+    .action(async (folder, options) => {
+      const tools = detectTools();
       
       try {
-        await compressFolder(resolvedPath, options, toolConfig);
+        const folderPath = await resolveFolderPath(folder);
+        if (!folderPath) return;
+        
+        await compressFolder(folderPath, options, tools);
       } catch (error) {
-        console.error('Compression failed:', error);
+        console.error('Error during compression:', error);
         process.exit(1);
       }
     });
@@ -74,24 +74,28 @@ async function main(): Promise<void> {
   // Decompress subcommand
   program
     .command('decompress')
-    .description('Decompress a tar.xz archive and restore timestamps')
-    .argument('<archive>', 'archive file to decompress')
-    .option('-o, --output [folder]', 'output folder path (optional - uses stored path from previous info command, or default: <archive-name>)')
-    .action(async (archive: string, options: DecompressOptions) => {
-      // If output is true (meaning -o was provided without value), try to resolve path
-      if (options.output === true) {
-        const resolvedPath = await resolveFolderPath(undefined);
-        if (resolvedPath) {
-          options.output = resolvedPath;
-        } else {
-          options.output = undefined; // Fall back to default behavior
-        }
-      }
+    .argument('<archive>', 'zpaq archive to decompress')
+    .description('Decompress a zpaq archive and restore timestamps')
+    .option('-o, --output [directory]', 'output directory (if no value provided, uses stored path)')
+    .action(async (archive, options) => {
+      const tools = detectTools();
       
       try {
-        await decompressArchive(archive, options, toolConfig);
+        // Handle -o flag usage
+        if (options.output === true) {
+          // -o flag was used without a value, try to use stored path
+          const storedPath = await resolveFolderPath(undefined);
+          if (storedPath) {
+            options.output = storedPath;
+          } else {
+            console.error('❌ No stored path available. Use "xtar info <folder>" first or provide a path with -o <path>');
+            process.exit(1);
+          }
+        }
+        
+        await decompressArchive(archive, options, tools);
       } catch (error) {
-        console.error('Decompression failed:', error);
+        console.error('Error during decompression:', error);
         process.exit(1);
       }
     });

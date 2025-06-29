@@ -83,7 +83,7 @@ async function restoreTimestamps(extractedFolderPath: string): Promise<void> {
 }
 
 /**
- * Decompress a tar.xz archive and restore timestamps
+ * Decompress a zpaq archive and restore timestamps
  */
 export async function decompressArchive(
   archivePath: string,
@@ -108,7 +108,7 @@ export async function decompressArchive(
   
   // Determine output directory
   const archiveBasename = basename(resolvedArchivePath);
-  const defaultOutputName = removeExtension(archiveBasename, '.tar.xz');
+  const defaultOutputName = removeExtension(archiveBasename, '.zpaq');
   const outputPath = (options.output && typeof options.output === 'string') ? resolve(options.output) : resolve(defaultOutputName);
   
   // Ensure output directory doesn't exist or is empty
@@ -136,27 +136,28 @@ export async function decompressArchive(
     process.exit(1);
   }
   
-  // Build tar extraction command
+  // Build zpaq extraction command
   const command = [
-    toolConfig.tarCommand,
-    `-C "${outputPath}"`,
-    `-I "xz -d"`,
-    `-xf "${resolvedArchivePath}"`
+    toolConfig.zpaqCommand,
+    'x',
+    `"${resolvedArchivePath}"`
   ].join(' ');
   
-  console.log('Extracting...');
+  console.log('Extracting with zpaq...');
   console.log(`Command: ${command}`);
+  console.log(`Working directory: ${outputPath}`);
   
   try {
-    // Execute extraction command
     execSync(command, { 
+      cwd: outputPath,
       stdio: 'inherit',
-      maxBuffer: 1024 * 1024 * 100 // 100MB buffer
+      maxBuffer: 1024 * 1024 * 100, // 100MB buffer
+      encoding: 'utf8'
     });
     
     console.log(`✓ Archive extracted to: ${outputPath}`);
     
-    // Find the extracted folder (tar extracts to a subdirectory)
+    // Find the extracted folder (zpaq extracts to a subdirectory)
     const contents = await fs.readdir(outputPath);
     if (contents.length === 0) {
       console.error('Error: No files were extracted from the archive');

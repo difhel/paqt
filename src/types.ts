@@ -10,8 +10,7 @@ export interface FileMetadata {
 
 /** Configuration for environment tools */
 export interface ToolConfig {
-  tarCommand: string;
-  xzCommand: string;
+  zpaqCommand: string;
 }
 
 /** Options for scan command */

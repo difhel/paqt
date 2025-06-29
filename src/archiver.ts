@@ -5,7 +5,7 @@ import { CompressOptions, ToolConfig } from './types.js';
 import { scanFolder, hasMetadata } from './scanner.js';
 
 /**
- * Compress a folder into a tar.xz archive
+ * Compress a folder into a zpaq archive with method 5
  */
 export async function compressFolder(
   folderPath: string, 
@@ -36,7 +36,7 @@ export async function compressFolder(
   
   // Determine output archive path
   const folderName = basename(resolvedFolderPath);
-  const defaultArchiveName = `${folderName}.tar.xz`;
+  const defaultArchiveName = `${folderName}.zpaq`;
   const archivePath = options.output ? resolve(options.output) : resolve(defaultArchiveName);
   
   // Ensure output directory exists
@@ -48,24 +48,26 @@ export async function compressFolder(
     process.exit(1);
   }
   
-  // Build tar command with maximum compression settings
+  // Build zpaq command with method 5 compression
   const parentDir = dirname(resolvedFolderPath);
   const command = [
-    toolConfig.tarCommand,
-    `-C "${parentDir}"`,
-    `-I "xz -9e --lzma2=dict=1536m -T0"`,
-    `-cf "${archivePath}"`,
-    `"${folderName}"`
+    toolConfig.zpaqCommand,
+    'a',
+    `"${archivePath}"`,
+    `"${folderName}"`,
+    `-m5`,  // Method 5 compression
   ].join(' ');
   
-  console.log('Compressing...');
+  console.log('Compressing with zpaq method 5...');
   console.log(`Command: ${command}`);
   
   try {
-    // Execute compression command
+    // Execute compression command in parent directory
     execSync(command, { 
+      cwd: parentDir,
       stdio: 'inherit',
-      maxBuffer: 1024 * 1024 * 100 // 100MB buffer
+      maxBuffer: 1024 * 1024 * 100, // 100MB buffer
+      encoding: 'utf8'
     });
     
     console.log(`✓ Archive created: ${archivePath}`);

@@ -14,7 +14,7 @@
     "start": "node --stack-size=10000 dist/cli.js",
     "test": "echo \"No tests specified\" && exit 0"
   },
-  "keywords": ["cli", "archive", "tar", "xz", "compression", "backup"],
+  "keywords": ["cli", "archive", "zpaq", "compression", "backup", "timestamp"],
   "author": "",
   "license": "MIT",
   "dependencies": {
