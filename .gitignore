@@ -1,6 +1,8 @@
 node_modules
 dist
 paqt
+paqt-linux
+paqt-macos
 homeMX.zpaq
 .DS_Store
 paqt-*.tgz
