@@ -5,6 +5,7 @@ import { parse } from 'csv-parse/sync';
 import { stringify } from 'csv-stringify/sync';
 import { FileMetadata, ScanOptions } from './types.js';
 import { isSymlink, toISOString } from './utils.js';
+import { ALL_PATTERNS } from './patterns.js';
 
 /**
  * Run a diagnostic command and capture its output safely
@@ -78,29 +79,21 @@ async function analyzeProblematicDirectory(dirPath: string, basePath: string, is
     analysis.push(`      Files: ${fileCount.replace(/\s+/g, '')}`);
     
     // Check for suspicious patterns
-    const suspiciousPatterns = [
-      { pattern: 'node_modules', desc: 'Node.js dependencies' },
-      { pattern: '.vscode', desc: 'VS Code settings' },
-      { pattern: 'cache', desc: 'Cache directories' },
-      { pattern: '.git', desc: 'Git repositories' },
-      { pattern: 'build', desc: 'Build artifacts' },
-      { pattern: 'dist', desc: 'Distribution files' }
-    ];
-    
     analysis.push(`\n   🔍 Checking for common problematic patterns...`);
-    for (const { pattern, desc } of suspiciousPatterns) {
+    for (const pattern of ALL_PATTERNS) {
       const count = runDiagnosticCommand(
-        `find "${dirPath}" -type d -name "*${pattern}*" 2>/dev/null | wc -l`,
-        `${pattern} directories`
+        `find "${dirPath}" -type d -name "*${pattern.pattern}*" 2>/dev/null | wc -l`,
+        `${pattern.pattern} directories`
       );
       const countNum = parseInt(count.replace(/\s+/g, ''));
       if (countNum > 0) {
-        analysis.push(`      ⚠️  Found ${countNum} ${desc} directories (${pattern})`);
+        const categoryIcon = pattern.category === 'safe' ? '🟢' : pattern.category === 'careful' ? '🟡' : '🔴';
+        analysis.push(`      ${categoryIcon} Found ${countNum} ${pattern.description} directories (${pattern.pattern})`);
         
         // Show first few examples
         const examples = runDiagnosticCommand(
-          `find "${dirPath}" -type d -name "*${pattern}*" 2>/dev/null | head -3`,
-          `${pattern} examples`
+          `find "${dirPath}" -type d -name "*${pattern.pattern}*" 2>/dev/null | head -3`,
+          `${pattern.pattern} examples`
         );
         if (examples && !examples.startsWith('Failed')) {
           examples.split('\n').forEach(example => {

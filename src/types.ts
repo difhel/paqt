@@ -27,4 +27,12 @@ export interface CompressOptions {
 /** Options for decompress command */
 export interface DecompressOptions {
   output?: string;
+}
+
+/** Options for clean command */
+export interface CleanOptions {
+  dryRun?: boolean;
+  includeCareful?: boolean;
+  includeDangerous?: boolean;
+  patterns?: string[];
 } 

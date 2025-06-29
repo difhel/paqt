@@ -4,8 +4,9 @@ import { Command } from 'commander';
 import { scanFolder } from './scanner.js';
 import { compressFolder } from './archiver.js';
 import { decompressArchive } from './restorer.js';
+import { cleanDirectories } from './cleaner.js';
 import { detectTools } from './utils.js';
-import { ScanOptions, CompressOptions, DecompressOptions } from './types.js';
+import { ScanOptions, CompressOptions, DecompressOptions, CleanOptions } from './types.js';
 
 // Package info (in a real project, this would come from package.json)
 const packageInfo = {
@@ -69,6 +70,43 @@ async function main(): Promise<void> {
         await decompressArchive(archive, options, toolConfig);
       } catch (error) {
         console.error('Decompression failed:', error);
+        process.exit(1);
+      }
+    });
+  
+  // Clean subcommand
+  program
+    .command('clean')
+    .description('Clean useless directories (node_modules, cache, build artifacts, etc.)')
+    .argument('<folder>', 'folder to clean')
+    .option('--dry-run', 'show what would be deleted without actually deleting')
+    .option('--include-careful', 'include careful patterns like .vscode, .cache (requires confirmation)')
+    .option('--include-dangerous', 'include dangerous patterns like .git (requires explicit confirmation)')
+    .option('--patterns <patterns...>', 'specify exact patterns to clean (comma-separated)')
+    .action(async (folder: string, options: any) => {
+      try {
+        // Handle patterns - could be array or string
+        let patterns: string[] | undefined = undefined;
+        if (options.patterns) {
+          if (Array.isArray(options.patterns)) {
+            // If it's already an array, flatten any comma-separated values
+            patterns = options.patterns.flatMap((p: string) => p.split(',').map(item => item.trim()));
+          } else if (typeof options.patterns === 'string') {
+            // If it's a string, split by comma
+            patterns = options.patterns.split(',').map((p: string) => p.trim());
+          }
+        }
+        
+        const cleanOptions: CleanOptions = {
+          dryRun: options.dryRun,
+          includeCareful: options.includeCareful,
+          includeDangerous: options.includeDangerous,
+          patterns
+        };
+        
+        await cleanDirectories(folder, cleanOptions);
+      } catch (error) {
+        console.error('Cleaning failed:', error);
         process.exit(1);
       }
     });

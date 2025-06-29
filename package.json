@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "build-cli": "bun build src/cli.ts --compile --outfile xtar",
     "dev": "tsx src/cli.ts",
     "alias": "npm run build && npm run start",
     "start": "node --stack-size=10000 dist/cli.js",

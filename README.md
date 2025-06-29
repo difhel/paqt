@@ -66,6 +66,7 @@ Commands:
   scan <folder>            Scan folder and create/update metadata.csv
   compress <folder>        Compress folder into tar.xz archive
   decompress <archive>     Decompress archive and restore timestamps
+  clean <folder>           Clean useless directories (node_modules, cache, etc.)
   help [command]           Display help for command
 
 Options:
@@ -130,6 +131,50 @@ xtar decompress archive.tar.xz -o restored-folder
 - On Linux: Sets modification time (birth time not supported)
 - Fails gracefully if timestamps cannot be set
 
+### 4. Clean Command
+
+Intelligently removes problematic directories that cause deep nesting and consume excessive space. Uses categorized patterns for safe, careful, and dangerous deletions.
+
+```bash
+# Safe clean - removes only regenerable files (node_modules, cache, build, dist)
+xtar clean /path/to/folder --dry-run
+
+# Actual cleaning of safe patterns
+xtar clean /path/to/folder
+
+# Include careful patterns (.vscode, .cache, tmp)
+xtar clean /path/to/folder --include-careful
+
+# Include dangerous patterns (.git, config) - use with extreme caution!
+xtar clean /path/to/folder --include-dangerous
+
+# Clean specific patterns only
+xtar clean /path/to/folder --patterns node_modules,cache,build
+```
+
+**Safety Categories:**
+- 🟢 **Safe**: `node_modules`, `.venv`, `cache`, `build`, `dist`, `.next`, `.nuxt` - can be regenerated
+- 🟡 **Careful**: `.vscode`, `target`, `tmp`, `.cache` - contain preferences/settings
+- 🔴 **Dangerous**: `.git`, `.config` - permanent loss if deleted
+
+**Example Output:**
+```bash
+📊 Found 368 directories to clean:
+════════════════════════════════════════════════════════════════════════════════
+
+🟢 Node.js dependencies (node_modules):
+   📁 Directories: 70
+   📄 Files: 40,128
+   💾 Total size: 245.8 MB
+   📝 Reason: Can be regenerated with npm/yarn install
+   📂 Largest directories:
+      1. project/node_modules (180.2 MB, 26,404 files)
+      2. lib/node_modules (45.3 MB, 8,932 files)
+
+💾 Total space to free: 487.3 MB
+📄 Total files to delete: 43,881
+```
+
 ## Examples
 
 ### Complete Workflow
@@ -156,6 +201,22 @@ rm -rf test-folder
 # 5. Decompress and restore
 xtar decompress test-folder.tar.xz
 # Restores test-folder/ with original timestamps
+```
+
+### Cleaning Problematic Directories
+
+```bash
+# 1. Analyze what would be cleaned (safe)
+xtar clean problematic-folder --dry-run
+
+# 2. Clean safe patterns (node_modules, cache, build, dist)
+xtar clean problematic-folder
+
+# 3. Scan the cleaned folder (should work much better now)
+xtar scan problematic-folder
+
+# 4. Compress the cleaned folder
+xtar compress problematic-folder
 ```
 
 ### Incremental Backups
@@ -276,6 +337,8 @@ The tool is structured into focused modules:
 - `scanner.ts` - Folder scanning and metadata CSV generation
 - `archiver.ts` - Compression operations
 - `restorer.ts` - Decompression and timestamp restoration
+- `cleaner.ts` - Directory cleaning and space optimization
+- `patterns.ts` - Suspicious pattern definitions and categorization
 - `utils.ts` - Utility functions and tool detection
 - `types.ts` - TypeScript type definitions
 
