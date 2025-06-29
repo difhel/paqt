@@ -9,7 +9,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/cli.ts",
-    "start": "node dist/cli.js",
+    "alias": "npm run build && npm run start",
+    "start": "node --stack-size=10000 dist/cli.js",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": ["cli", "archive", "tar", "xz", "compression", "backup"],

@@ -173,14 +173,54 @@ xtar scan my-project --append-only
 xtar compress my-project -o my-project-backup.tar.xz
 ```
 
-## Error Handling
+## Error Handling & Diagnostics
 
-The tool provides clear error messages and exits with appropriate codes:
+The tool provides comprehensive error analysis with detailed diagnostics for problematic directories:
 
 - **Exit code 0**: Success
 - **Exit code 1**: Error (missing tools, invalid paths, compression failures, etc.)
 
-Common error scenarios:
+### Enhanced Diagnostic Features
+
+When issues are encountered during scanning, the tool provides:
+
+1. **Exact Problem Location**: Shows precisely which files/folders are problematic
+2. **Issue Classification**: STACK_OVERFLOW, CIRCULAR_SYMLINK, PERMISSION_DENIED, etc.
+3. **Detailed Analysis**: Runs diagnostic commands and shows results
+4. **Actionable Solutions**: Specific commands to investigate and fix issues
+
+### Example Diagnostic Output
+
+```bash
+⚠️  Issues encountered during scan (1 paths skipped):
+════════════════════════════════════════════════════════════════════════════════
+1. STACK_OVERFLOW: Directory 'project/node_modules' contains extremely deep nesting...
+════════════════════════════════════════════════════════════════════════════════
+
+📋 DETAILED DIAGNOSTIC ANALYSIS
+════════════════════════════════════════════════════════════════════════════════
+
+🔍 Detailed analysis of problematic directory: 'project/node_modules'
+   📁 Type: Directory
+   📏 Size: 4.2 MB
+   📅 Modified: 2024-01-15T10:30:45.123Z
+
+   🔍 Finding deepest nested paths...
+   📊 Top 5 deepest paths:
+      1. Depth 25: project/node_modules/@babel/core/lib/transformation/file/generate.js
+      2. Depth 24: project/node_modules/webpack/lib/dependencies/HarmonyImportDependency.js
+
+   📊 Contents summary:
+      Directories: 15,847
+      Files: 89,234
+
+   🔍 Checking for common problematic patterns...
+      ⚠️  Found 892 Node.js dependencies directories (node_modules)
+      ⚠️  Found 45 Cache directories (cache)
+      ⚠️  Found 23 Build artifacts (build)
+```
+
+### Common Error Scenarios
 
 ```bash
 # Missing required tools
