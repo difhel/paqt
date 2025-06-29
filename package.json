@@ -1,6 +1,6 @@
 {
   "name": "paqt",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A TypeScript CLI tool for reliable folder archiving with timestamp preservation",
   "main": "dist/cli.js",
   "bin": {
@@ -17,7 +17,7 @@
     "dev": "tsx src/cli.ts",
     "alias": "npm run build && npm run start",
     "start": "node --stack-size=10000 dist/cli.js",
-    "make-release": "npm run build && npm run build-executable && version=$(node -p \"require('./package.json').version\") && npm publish && git tag v$version && git push origin v$version",
+    "make-release": "npm run build && npm run build-executable && version=$(node -p \"require('./package.json').version\") && git commit -am \"Release v$version\" && git push origin master&& (npm publish || 1) && git tag v$version && git push origin v$version",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [
