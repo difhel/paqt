@@ -63,11 +63,13 @@ npm run dev -- --help
 xtar <command> [options]
 
 Commands:
-  scan <folder>            Scan folder and create/update metadata.csv
-  compress <folder>        Compress folder into tar.xz archive
+  scan [folder]            Scan folder and create/update metadata.csv (uses stored path if omitted)
+  compress [folder]        Compress folder into tar.xz archive (uses stored path if omitted)
   decompress <archive>     Decompress archive and restore timestamps
-  clean <folder>           Clean useless directories (node_modules, cache, etc.)
-  info <folder>            Show directory statistics (size, file/folder counts, largest items)
+  clean [folder]           Clean useless directories (uses stored path if omitted)
+  info [folder]            Show directory statistics (uses stored path if omitted)
+  rm <paths...>            Remove files/directories relative to the stored base directory
+  reset                    Clear the stored base directory from previous info command
   help [command]           Display help for command
 
 Options:
@@ -80,11 +82,16 @@ Options:
 Recursively scans a folder and generates a `metadata.csv` file containing file paths and modification timestamps.
 
 ```bash
-# Basic scan - overwrites existing metadata.csv
+# Basic scan with explicit path - overwrites existing metadata.csv
 xtar scan /path/to/folder
 
 # Append-only scan - preserves existing entries, adds new files
 xtar scan /path/to/folder --append-only
+
+# Use stored path from previous info command
+xtar info /path/to/folder    # Sets working directory
+xtar scan                    # Scans stored path
+xtar scan --append-only      # Append-only scan of stored path
 ```
 
 **Output Format** (`metadata.csv`):
@@ -100,12 +107,16 @@ subfolder/file2.js,2024-01-14T15:20:30.456Z
 Compresses a folder into a highly compressed `.tar.xz` archive. Automatically scans the folder if `metadata.csv` doesn't exist.
 
 ```bash
-# Compress with default name (folder-name.tar.xz)
+# Compress with explicit path and default name (folder-name.tar.xz)
 xtar compress /path/to/folder
 
 # Compress with custom output path
 xtar compress /path/to/folder --output /custom/path/archive.tar.xz
 xtar compress /path/to/folder -o archive.tar.xz
+
+# Use stored path from previous info command
+xtar info /path/to/folder    # Sets working directory
+xtar compress                # Uses stored path
 ```
 
 **Compression Settings:**
@@ -125,6 +136,10 @@ xtar decompress archive.tar.xz
 # Decompress to custom folder
 xtar decompress archive.tar.xz --output /custom/path
 xtar decompress archive.tar.xz -o restored-folder
+
+# Use stored path from previous info command for output location
+xtar info /restore/here        # Sets working directory
+xtar decompress archive.tar.xz -o  # Uses stored path as output location
 ```
 
 **Timestamp Restoration:**
@@ -137,7 +152,7 @@ xtar decompress archive.tar.xz -o restored-folder
 Intelligently removes problematic directories that cause deep nesting and consume excessive space. Uses categorized patterns for safe, careful, and dangerous deletions.
 
 ```bash
-# Safe clean - removes only regenerable files (node_modules, cache, build, dist)
+# Safe clean with explicit path - removes only regenerable files (node_modules, cache, build, dist)
 xtar clean /path/to/folder --dry-run
 
 # Actual cleaning of safe patterns
@@ -151,6 +166,11 @@ xtar clean /path/to/folder --include-dangerous
 
 # Clean specific patterns only
 xtar clean /path/to/folder --patterns node_modules,cache,build
+
+# Use stored path from previous info command
+xtar info /path/to/folder    # Sets working directory
+xtar clean --dry-run         # Clean stored path (dry run)
+xtar clean --patterns cache  # Clean specific patterns from stored path
 ```
 
 **Safety Categories:**
@@ -220,6 +240,91 @@ xtar info /path/to/folder
 
 The `info` command is perfect for understanding directory composition before cleaning or archiving operations.
 
+#### Path Memorization
+
+**ALL commands** support automatic path memorization for seamless workflow:
+
+- `info`, `scan`, `compress`, `clean` - Make folder parameter optional
+- `decompress` - Supports optional output path with `-o` flag  
+- `rm` - Uses stored path as base directory for relative file operations
+
+**How it works:**
+1. **When you provide a path explicitly**: The path is verified and stored for future use
+2. **When you omit the path**: The tool uses the previously stored path from `~/.xtar_info`
+3. **If no stored path exists**: Shows helpful error with instructions
+
+**Complete workflow example:**
+```bash
+# Set working directory once
+xtar info ~/large-project
+
+# Now ALL commands can omit paths
+xtar scan                        # Scan ~/large-project
+xtar clean --dry-run             # Clean ~/large-project (dry run)
+xtar rm build logs cache         # Remove files from ~/large-project
+xtar compress                    # Compress ~/large-project
+xtar info                        # Re-analyze ~/large-project
+
+# Clean up when done
+xtar reset
+```
+
+### 6. Remove Command
+
+The `rm` command allows you to remove files and directories using relative paths from the last `info` command, without changing your current working directory.
+
+```bash
+# First, analyze a directory
+xtar info /path/to/analyze
+
+# Then remove files using relative paths shown in the info output
+xtar rm file1.txt subdirectory/largefile.dat folder1
+
+# Remove multiple items at once
+xtar rm *.log build cache node_modules
+```
+
+**Features:**
+- 🗂️ Uses base directory from last `info` command
+- 🔒 Security: prevents path traversal outside base directory
+- 📊 Detailed removal summary with success/failure counts
+- 📁 Handles both files and directories (recursive removal)
+- ⚠️ Shows clear error messages for missing items
+
+**Example Workflow:**
+```bash
+# 1. Analyze directory structure
+xtar info ~/projects/my-app
+# 📄 Top 10 Largest Files:
+#     1. node_modules/package.zip (50 MB)
+#     2. build/bundle.js (25 MB)
+#     3. logs/debug.log (10 MB)
+
+# 2. Remove largest files without changing directory
+xtar rm node_modules/package.zip build/bundle.js logs/debug.log
+
+# 3. Clear the stored path when done
+xtar reset
+```
+
+### 7. Reset Command
+
+The `reset` command clears the stored base directory from the previous `info` command.
+
+```bash
+# Clear stored directory path
+xtar reset
+```
+
+**Use Cases:**
+- Clean up after using `rm` command
+- Clear stale directory references
+- Reset before analyzing a different directory
+
+**Error Handling:**
+- Shows error if `.xtar_info` file doesn't exist
+- Confirms successful deletion
+
 ## Examples
 
 ### Complete Workflow
@@ -277,6 +382,79 @@ xtar scan my-project --append-only
 
 # Compress with all metadata
 xtar compress my-project -o my-project-backup.tar.xz
+```
+
+### Directory Analysis and Targeted Cleanup
+
+```bash
+# 1. Analyze a large directory from anywhere (sets working directory)
+cd ~
+xtar info /some/deep/path/project-folder
+
+# 2. Review the largest files and decide what to remove
+# Output shows relative paths like:
+#   📄 Top 10 Largest Files:
+#      1. logs/application.log (500 MB)
+#      2. node_modules/package.zip (200 MB)
+#      3. build/bundle.js (50 MB)
+
+# 3. Remove problematic files without changing directory
+xtar rm logs/application.log node_modules/package.zip build
+
+# 4. Verify the cleanup (uses stored path)
+xtar info
+
+# 5. Compress the cleaned project (uses stored path)
+xtar compress -o ~/backups/cleaned-project.tar.xz
+
+# 6. Clean up when done
+xtar reset
+```
+
+### Path Memorization Workflow
+
+```bash
+# 1. Set working directory once
+xtar info ~/projects/my-app
+
+# 2. Use ALL commands without repeating the path
+xtar scan                               # Scan ~/projects/my-app  
+xtar clean --dry-run                    # Preview cleanup of ~/projects/my-app
+xtar clean --patterns cache            # Actually clean cache from ~/projects/my-app
+xtar rm build logs                     # Remove specific files from ~/projects/my-app
+xtar compress                          # Compress ~/projects/my-app
+xtar info                              # Re-analyze ~/projects/my-app
+xtar compress -o ~/backups/clean.tar.xz # Compress again with custom output
+
+# 3. Clean up stored path
+xtar reset
+```
+
+### Complete Project Analysis Workflow
+
+```bash
+# 1. Analyze a problematic directory
+cd ~
+xtar info /deep/path/problematic-project
+
+# 2. Create initial backup  
+xtar scan                              # Generate metadata.csv
+xtar compress -o ~/backups/original.tar.xz
+
+# 3. Clean up the project
+xtar clean --dry-run                   # Preview what would be deleted
+xtar clean                             # Remove safe patterns (node_modules, cache, etc.)
+xtar rm logs/debug.log build/old       # Remove specific large files
+
+# 4. Create cleaned backup
+xtar scan                              # Update metadata after cleanup
+xtar compress -o ~/backups/cleaned.tar.xz
+
+# 5. Verify results
+xtar info                              # Check final size and structure
+
+# 6. Clean up
+xtar reset
 ```
 
 ## Error Handling & Diagnostics

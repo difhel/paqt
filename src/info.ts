@@ -1,6 +1,7 @@
-import { existsSync, statSync } from 'fs';
+import { existsSync, statSync, writeFileSync } from 'fs';
 import { execSync } from 'child_process';
 import { resolve } from 'path';
+import { homedir } from 'os';
 
 /**
  * Interface for directory statistics
@@ -202,4 +203,13 @@ export async function getDirectoryInfo(dirPath: string): Promise<void> {
   }
   
   console.log('\n' + '═'.repeat(80));
+  
+  // Save the directory path for use with rm command
+  try {
+    const infoFile = resolve(homedir(), '.xtar_info');
+    writeFileSync(infoFile, fullPath, 'utf-8');
+    console.log(`💾 Directory path saved for future commands: ${fullPath}`);
+  } catch (error) {
+    console.warn(`⚠️  Could not save directory path: ${error}`);
+  }
 } 

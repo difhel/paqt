@@ -26,7 +26,7 @@ export interface CompressOptions {
 
 /** Options for decompress command */
 export interface DecompressOptions {
-  output?: string;
+  output?: string | boolean; // boolean when -o flag is used without value
 }
 
 /** Options for clean command */

@@ -109,7 +109,7 @@ export async function decompressArchive(
   // Determine output directory
   const archiveBasename = basename(resolvedArchivePath);
   const defaultOutputName = removeExtension(archiveBasename, '.tar.xz');
-  const outputPath = options.output ? resolve(options.output) : resolve(defaultOutputName);
+  const outputPath = (options.output && typeof options.output === 'string') ? resolve(options.output) : resolve(defaultOutputName);
   
   // Ensure output directory doesn't exist or is empty
   try {
