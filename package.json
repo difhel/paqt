@@ -6,6 +6,11 @@
   "bin": {
     "paqt": "./dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "build-executable": "bun build src/cli.ts --compile --outfile paqt",
