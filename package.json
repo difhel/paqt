@@ -17,6 +17,7 @@
     "dev": "tsx src/cli.ts",
     "alias": "npm run build && npm run start",
     "start": "node --stack-size=10000 dist/cli.js",
+    "make-release": "npm run build && npm run build-executable && version=$(node -p \"require('./package.json').version\") && npm publish && git tag v$version && git push origin v$version",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [
