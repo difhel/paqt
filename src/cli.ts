@@ -8,22 +8,13 @@ import { cleanDirectories } from './cleaner.js';
 import { getDirectoryInfo } from './info.js';
 import { resetBaseDirectory, removeRelative, resolveFolderPath } from './rmops.js';
 import { detectTools } from './utils.js';
-import { ScanOptions, CompressOptions, DecompressOptions, CleanOptions } from './types.js';
-
-// Package info (in a real project, this would come from package.json)
-const packageInfo = {
-  name: 'paqt',
-  version: '1.0.0',
-  description: 'A TypeScript CLI tool for reliable folder archiving with timestamp preservation'
-};
+import { ScanOptions, CleanOptions } from './types.js';
+import { packageInfo } from './env.js';
 
 /**
  * Main CLI function
  */
 async function main(): Promise<void> {
-  // Detect required tools at startup
-  const toolConfig = detectTools();
-  
   const program = new Command();
   
   program
